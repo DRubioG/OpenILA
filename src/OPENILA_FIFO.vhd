@@ -59,7 +59,7 @@ begin
 
   LFSR_inst : entity work.LFSR
   generic map (
-    G_FIFO_SIZE => G_SAMPLES,
+    G_SAMPLES => G_SAMPLES,
     G_WIDTH => G_WIDTH_1
   )
   port map (
@@ -78,7 +78,7 @@ begin
 
     FIFO_inst : entity work.LFSR
       generic map(
-        G_FIFO_SIZE => G_SAMPLES,
+        G_SAMPLES => G_SAMPLES,
         G_WIDTH     => G_WIDTH_2
       )
       port map
