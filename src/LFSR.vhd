@@ -38,7 +38,30 @@ architecture rtl of LFSR is
   signal r_data : t_lfsr;
   --! This is the counter of the trigger of the LFSR.
   signal r_cont : integer range 0 to G_SAMPLES;
+
+  signal input_d1, input_d2, input_d3, input_d4 : std_logic_vector(G_WIDTH-1 downto 0);
 begin
+
+  process (CLK_I)
+  begin
+    if rising_edge(CLK_I) then
+      if RST_N_I = '0' then
+        input_d1 <= (others => '0') ;
+        input_d2 <= (others => '0') ;
+        input_d3 <= (others => '0') ;
+        input_d4 <= (others => '0') ;
+      else
+        input_d1 <= DATA_I;
+        input_d2 <= input_d1;
+        input_d3 <= input_d2;
+        input_d4 <= input_d3;
+      end if;
+    end if;
+  end process;
+
+
+
+
   --! This process is the LFSR.
   LFSR_PROCESS : process (CLK_I)
   begin
@@ -48,7 +71,7 @@ begin
         DATA_O <= (others => '0');
       elsif EN_I = '1' then
         if STOP_I = '0' then
-          r_data(0) <= DATA_I;
+          r_data(0) <= input_d4;
           for i in 0 to G_SAMPLES - 2 loop
             r_data(i + 1) <= r_data(i);
           end loop;

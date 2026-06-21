@@ -26,6 +26,8 @@ entity probe_individual is
     TRIGGER_VALUE_I : in std_logic_vector(G_WIDTH_PROBE - 1 downto 0);
     --! Start trigger. High level active.
     TRIGGER_START_I : in std_logic;
+
+    TRIGGER_STOP_I : in std_logic;
     --! This is the trigger indicator. High level active.
     TRIGGER_FINISH_O : out std_logic;
     --! This is the read asking port. High level active.
@@ -38,6 +40,9 @@ architecture rtl of probe_individual is
   --! This signal connects the finish of the trigger
   --! with the stop of the LFSR.
   signal s_trigger_finish : std_logic;
+
+  signal s_read : std_logic;
+
 begin
 
   --! This is the Trigger output indicator.
@@ -55,7 +60,7 @@ begin
       RST_N_I       => RST_N_I,
       EN_I          => EN_I,
       STOP_I        => s_trigger_finish,
-      READ_I        => READ_I,
+      READ_I        => s_read,
       DATA_I        => DATA_I,
       DATA_O        => open,
       FINISH_READ_O => open
@@ -77,7 +82,9 @@ begin
       TRIGGER_TYPE_I   => TRIGGER_TYPE_I,
       TRIGGER_VALUE_I  => TRIGGER_VALUE_I,
       TRIGGER_START_I  => TRIGGER_START_I,
+      TRIGGER_STOP_I   => TRIGGER_STOP_I,
       READ_I           => READ_I,
+      READ_O           => s_read,
       TRIGGER_ACTIVE_O => open,
       TRIGGER_FINISH_O => s_trigger_finish
     );

@@ -25,6 +25,8 @@ architecture bench of probe_individual_tb is
   signal r_cont           : integer range 0 to 2 ** 5;
   signal TRIGGER_FINISH_O : std_logic;
   signal READ_I           : std_logic;
+
+  signal TRIGGER_STOP_I : std_logic;
 begin
 
   probe_individual_inst : entity work.probe_individual
@@ -42,6 +44,7 @@ begin
       TRIGGER_TYPE_I   => TRIGGER_TYPE_I,
       TRIGGER_VALUE_I  => TRIGGER_VALUE_I,
       TRIGGER_START_I  => TRIGGER_START_I,
+      TRIGGER_STOP_I   => TRIGGER_STOP_I,
       TRIGGER_FINISH_O => TRIGGER_FINISH_O,
       READ_I           => READ_I
     );
@@ -50,11 +53,13 @@ begin
 
   RST_N_I <= '0', '1' after 50 ns;
 
-  EN_I    <= '1';
+  EN_I <= '1';
 
-  DATA_I  <= std_logic_vector(to_unsigned(r_cont, DATA_I'length));
+  TRIGGER_STOP_I <= '0';
 
-  POSITION_I <= std_logic_vector(to_unsigned(0, POSITION_I'length));
+  DATA_I <= std_logic_vector(to_unsigned(r_cont, DATA_I'length));
+
+  POSITION_I <= std_logic_vector(to_unsigned(11, POSITION_I'length));
 
   TRIGGER_VALUE_I <= std_logic_vector(to_unsigned(5, TRIGGER_VALUE_I'length));
 
@@ -83,11 +88,11 @@ begin
     TRIGGER_START_I <= '0';
     wait;
   end process;
-  
+
   process begin
     READ_I <= '0';
     wait until TRIGGER_FINISH_O = '1';
-    wait for 20*C_CLK_PERIOD;
+    wait for 20 * C_CLK_PERIOD;
     READ_I <= '1';
     wait;
   end process;

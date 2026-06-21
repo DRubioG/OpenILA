@@ -41,8 +41,12 @@ entity trigger_controller is
     -- TRIGGER_OK_I : in std_logic;
     --! Start trigger. High level active.
     TRIGGER_START_I : in std_logic;
+
+    TRIGGER_STOP_I : in std_logic;
     --! Read indicator to get the ILA value. High level active.
     READ_I : in std_logic;
+
+    READ_O : out std_logic;
     --! This indicates if the trigger is active. High level active.
     TRIGGER_ACTIVE_O : out std_logic;
     --! This indicates that the trigger is active. High level active.
@@ -59,13 +63,13 @@ architecture rtl of trigger_controller is
     --! This state waits until the trigger jumps.
     SM_WAIT,
     --! This state waits until to export the ILA data.
-    SM_FINISH,
+    SM_FINISH_TRIGGER,
     --! This state exports the ILA data.
-    SM_SEND,
+    SM_SEND_DATA,
     
-    SM_SAMPLES,
+    SM_TRIGGER_ALLOCATION
     --! This state finishes the ILA export.
-    SM_STOP
+    -- SM_STOP
   );
   --! This register gets the current state of the state machine.
   signal re_state : fsm;
@@ -107,30 +111,29 @@ begin
 
           when SM_WAIT =>
             re_state <= SM_WAIT;
-            if s_trigger_start = '1' then
-              re_state <= SM_SAMPLES;
+            if TRIGGER_STOP_I = '1' then
+              re_state <= SM_IDLE;
+            elsif s_trigger_start = '1' then
+              re_state <= SM_TRIGGER_ALLOCATION;
             end if;
 
-          when SM_SAMPLES =>
-            re_state <= SM_SAMPLES;
+          when SM_TRIGGER_ALLOCATION =>
+            re_state <= SM_TRIGGER_ALLOCATION;
             if s_trigger = '1' then
-              re_state <= SM_FINISH;
+              re_state <= SM_FINISH_TRIGGER;
             end if;
 
-          when SM_FINISH =>
-            re_state <= SM_FINISH;
+          when SM_FINISH_TRIGGER =>
+            re_state <= SM_FINISH_TRIGGER;
             if READ_I = '1' then
-              re_state <= SM_SEND;
+              re_state <= SM_SEND_DATA;
             end if;
 
-          when SM_SEND =>
-            re_state <= SM_SEND;
+          when SM_SEND_DATA =>
+            re_state <= SM_SEND_DATA;
             if r_cont_send_samples >= G_SAMPLES-1 then
-              re_state <= SM_STOP;
+              re_state <= SM_IDLE;
             end if;
-
-          when SM_STOP =>
-            re_state <= SM_IDLE;
 
           when others =>
             re_state <= SM_IDLE;
@@ -166,9 +169,10 @@ begin
         r_cont_pos      <= 0;
       elsif EN_I = '1' then
         s_trigger <= '0';
-        if re_state = SM_SAMPLES then
+        r_cont_pos      <= 0;
+        if re_state = SM_TRIGGER_ALLOCATION then
           r_cont_pos <= r_cont_pos + 1;
-          if r_cont_pos >= s_position - 4 and s_trigger = '0' then
+          if r_cont_pos >= s_position and s_trigger = '0' then
             s_trigger <= '1';
           end if;
         end if;
@@ -225,7 +229,7 @@ FINISH_PROCESS : process (CLK_I)
       elsif EN_I = '1' then
         if re_state = SM_WAIT then
           TRIGGER_FINISH_O <= '0';
-        elsif re_state = SM_FINISH then
+        elsif re_state = SM_FINISH_TRIGGER then
           TRIGGER_FINISH_O <= '1';
         end if;
       end if;
@@ -241,8 +245,23 @@ begin
       r_cont_send_samples <= 0;
     elsif EN_I = '1' then
       r_cont_send_samples <= 0;
-      if re_state = SM_SEND then
+      if re_state = SM_SEND_DATA then
         r_cont_send_samples <= r_cont_send_samples+1;
+      end if;
+    end if;
+  end if;
+end process;
+
+
+process (CLK_I)
+begin
+  if rising_edge(CLK_I) then
+    if RST_N_I = '0' then
+      READ_O <= '0';
+    elsif EN_I = '1' then
+      READ_O <= '0';
+      if re_state = SM_SEND_DATA then
+        READ_O <= '1';
       end if;
     end if;
   end if;
