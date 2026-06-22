@@ -39,10 +39,13 @@ architecture rtl of LFSR is
   --! This is the counter of the trigger of the LFSR.
   signal r_cont : integer range 0 to G_SAMPLES;
 
+  --! Input delays 
   signal input_d1, input_d2, input_d3, input_d4 : std_logic_vector(G_WIDTH-1 downto 0);
 begin
 
-  process (CLK_I)
+--! This process delays the input data of the LFSR to synchrnizes with the control signals
+--! of the controller.
+INPUT_DELAY : process (CLK_I)
   begin
     if rising_edge(CLK_I) then
       if RST_N_I = '0' then

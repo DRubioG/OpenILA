@@ -41,11 +41,11 @@ entity trigger_controller is
     -- TRIGGER_OK_I : in std_logic;
     --! Start trigger. High level active.
     TRIGGER_START_I : in std_logic;
-
+    --! This port indicates to the controller to stop the capture data.
     TRIGGER_STOP_I : in std_logic;
     --! Read indicator to get the ILA value. High level active.
     READ_I : in std_logic;
-
+    --! This port sends the order to the LFSR to return its data.
     READ_O : out std_logic;
     --! This indicates if the trigger is active. High level active.
     TRIGGER_ACTIVE_O : out std_logic;
@@ -66,10 +66,8 @@ architecture rtl of trigger_controller is
     SM_FINISH_TRIGGER,
     --! This state exports the ILA data.
     SM_SEND_DATA,
-    
+    --! This state allocates the trigger.
     SM_TRIGGER_ALLOCATION
-    --! This state finishes the ILA export.
-    -- SM_STOP
   );
   --! This register gets the current state of the state machine.
   signal re_state : fsm;
@@ -252,8 +250,8 @@ begin
   end if;
 end process;
 
-
-process (CLK_I)
+--! This process indicates to the LFSR to return its data.
+READ_SIGNAL : process (CLK_I)
 begin
   if rising_edge(CLK_I) then
     if RST_N_I = '0' then
