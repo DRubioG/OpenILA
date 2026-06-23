@@ -32,11 +32,10 @@ entity probe_individual is
     TRIGGER_FINISH_O : out std_logic;
     --! This is the read asking port. High level active.
     READ_I : in std_logic;
-
+    --! This is the data of the probe.
     DATA_O : out std_logic_vector(G_WIDTH_PROBE-1 downto 0);
-
+    --! This port indicates that the trigger is active.
     TRIGGER_ACTIVE_O : out std_logic
-
   );
 end entity probe_individual;
 

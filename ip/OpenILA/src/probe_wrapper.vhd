@@ -4,10 +4,13 @@ use ieee.math_real.all;
 
 entity probe_wrapper is
   generic (
+    --! Number of probes.
     G_PROBES  : integer range 1 to 32;
+    --! Number of samples per probe.
     G_SAMPLES : integer range 64 to 2 ** 20;
-
+    --! Width of the probe 1.
     G_WIDTH_1 : integer := 32;
+    --! Width of the probe 2.
     G_WIDTH_2 : integer := 32
     -- G_WIDTH_3  : integer := 32;
     -- G_WIDTH_4  : integer := 32;
@@ -41,24 +44,37 @@ entity probe_wrapper is
     -- G_WIDTH_32 : integer := 32
   );
   port (
+    --! Input clock of this module.
     CLK_I       : in std_logic;
+    --! Input reset of this module. Low level active.
     RST_N_I     : in std_logic;
+    --! Input enable of this module.
     EN_I        : in std_logic;
+    --! Input data for the probe 1.
     DATA_PROBE1 : in std_logic_vector(G_WIDTH_1 - 1 downto 0);
+    --! Input data for the probe 2.
     DATA_PROBE2 : in std_logic_vector(G_WIDTH_2 - 1 downto 0);
+    --! Position of the trigger.
     POSITION_I  : in std_logic_vector(integer(SQRT(real(G_SAMPLES))) - 1 downto 0);
-
+    --! Trigger type for the probe 1.
     TRIGGER_TYPE1    : in std_logic_vector(2 downto 0);
+    --! Trigger type for the probe 2.
     TRIGGER_TYPE2    : in std_logic_vector(2 downto 0);
+    --! Trigger value for the probe 1.
     TRIGGER_VALUE1   : in std_logic_vector(G_WIDTH_1 - 1 downto 0);
+    --! Trigger value for the probe 2.
     TRIGGER_VALUE2   : in std_logic_vector(G_WIDTH_2 - 1 downto 0);
+    --! Start trigger. High level active.
     TRIGGER_START_I  : in std_logic;
+    --! Stop trigger. High level active.
     TRIGGER_STOP_I   : in std_logic;
+    --! Finish trigger. High level active-
     TRIGGER_FINISH_O : out std_logic;
+    --! Read the probe indicator. High level active.
     READ_I           : in std_logic;
-
+    --! Read data.
     DATA1_O : out std_logic_vector(G_WIDTH_1-1 downto 0);
-
+    --! Port to indicate the probe is active. High level active.
     TRIGGER_ACTIVE_1_O : out std_logic
   );
 end entity probe_wrapper;
@@ -66,6 +82,9 @@ end entity probe_wrapper;
 architecture rtl of probe_wrapper is
 
 begin
+
+
+  --! This instantate the probe 1.
   probe1_inst : entity work.probe_individual
     generic map(
       G_SAMPLES     => G_SAMPLES,
