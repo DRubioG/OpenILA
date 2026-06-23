@@ -73,6 +73,9 @@ entity OpenILA is
     G_WIDTH_31 : integer := 32;
     --! Width of the 32th probe.
     G_WIDTH_32 : integer := 32;
+    
+    --! Open ILA ID.
+    G_ID : integer := 1;
 
     -- UART Interface
     --! This generic activates the UART interface.
